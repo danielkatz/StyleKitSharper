@@ -47,4 +47,5 @@
     #csharp .csharp-output {
         height: 100%;
         width: 100%;
+        white-space: pre;
     }
