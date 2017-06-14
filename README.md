@@ -1,2 +1,2 @@
 # StyleKitSharper
-PaintCode StyleKit transformation tool to C# for Xamarin.Android
+PaintCode StyleKit transpiler from Java to C# for Xamarin.Android
