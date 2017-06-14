@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using Antlr4.Runtime;
-using Antlr4.Runtime.Misc;
+using StyleKitSharper.Web.Parser;
+using StyleKitSharper.Web.Transpiler;
 
 namespace StyleKitSharper.Web.Controllers
 {
@@ -27,12 +28,13 @@ namespace StyleKitSharper.Web.Controllers
             var stream = new AntlrInputStream(java);
             var lexer = new JavaLexer(stream);
             var tokens = new CommonTokenStream(lexer);
-            var rewriter = new TokenStreamRewriter(tokens);
             var parser = new JavaParser(tokens);
             parser.BuildParseTree = true;
-            var tree = parser.compilationUnit();
 
-            return rewriter.GetText();
+            var transpiler = new StyleKitVisitor(tokens);
+            transpiler.Visit(parser.compilationUnit());
+
+            return transpiler.GetResult();
         }
     }
 }
