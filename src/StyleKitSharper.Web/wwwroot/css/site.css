@@ -10,13 +10,6 @@
     padding-right: 15px;
 }
 
-/* Set widths on the form inputs since otherwise they're 100% wide */
-input,
-select,
-textarea {
-    max-width: 280px;
-}
-
 /* Carousel */
 .carousel-caption p {
     font-size: 20px;
@@ -35,3 +28,23 @@ textarea {
         display: none;
     }
 }
+
+#java, #csharp {
+    height: calc(100vh - 150px);
+}
+
+#java {
+}
+
+    #java .java-input {
+        height: 100%;
+        width: 100%;
+    }
+
+#csharp {
+}
+
+    #csharp .csharp-output {
+        height: 100%;
+        width: 100%;
+    }
