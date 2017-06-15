@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace StyleKitSharper.Web.Transpiler
+namespace StyleKitSharper.Core.Transpiler
 {
     public static class ParseTreeExtensions
     {

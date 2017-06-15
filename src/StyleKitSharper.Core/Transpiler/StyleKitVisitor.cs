@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 using static JavaParser;
 using Humanizer;
 using System.Text.RegularExpressions;
+using StyleKitSharper.Core.Properties;
 
-namespace StyleKitSharper.Web.Transpiler
+namespace StyleKitSharper.Core.Transpiler
 {
     public class StyleKitVisitor
     {
@@ -34,6 +35,13 @@ namespace StyleKitSharper.Web.Transpiler
             { @"Paint\.Style\.STROKE", @"Paint.Style.Stroke" },
             { @"PorterDuff\.Mode\.SRC_IN", @"PorterDuff.Mode.SrcIn" },
             { @"Arrays\.equals", @"Enumerable.SequenceEqual" },
+
+            { @"(.*)\.setFlags", @"$1.Flags = " },
+            { @"(.*)\.setColor", @"$1.Color = (ColorWrapper)" },
+            { @"(.*)\.setStrokeWidth", @"$1.StrokeWidth = " },
+            { @"(.*)\.setStrokeMiter", @"$1.StrokeMiter = " },
+
+            { @"(.*)\.drawColor\((.*)\.color\)", @"$1.DrawColor((ColorWrapper)$2.Color)" },
         };
 
         private readonly TokenStreamRewriter _rewriter;
@@ -96,7 +104,6 @@ namespace StyleKitSharper.Web.Transpiler
                 var qualifiedName = package.qualifiedName().GetText();
 
                 _rewriter.Replace(package.Start, package.Stop, $"namespace {qualifiedName} {{");
-                _rewriter.InsertAfter(ctx.Stop, "\n}");
             }
 
             var imports = ctx.importDeclaration();
@@ -107,6 +114,13 @@ namespace StyleKitSharper.Web.Transpiler
                     imports.Last().Stop,
                     string.Join("\n", Usings.Select(x => $"using {x};")));
             }
+
+            if (package != null)
+            {
+                _rewriter.InsertAfter(ctx.Stop, "\n}");
+            }
+
+            _rewriter.InsertAfter(ctx.Stop, "\n\n" + Resources.ColorWrapper);
         }
 
         private void VisitClassDeclaration(ClassDeclarationContext ctx)
@@ -186,7 +200,8 @@ namespace StyleKitSharper.Web.Transpiler
             {
                 if (Regex.IsMatch(expressionText, $"^{map.Key}$"))
                 {
-                    _rewriter.Replace(ctx.Start, ctx.Stop, map.Value);
+                    var replacement = Regex.Replace(expressionText, map.Key, map.Value);
+                    _rewriter.Replace(ctx.Start, ctx.Stop, replacement);
                     return false;
                 }
             }
