@@ -12,11 +12,28 @@ namespace StyleKitSharper.Web.Transpiler
 {
     public class StyleKitVisitor
     {
-        private static readonly string[] usings = new string[] {
+        private static readonly string[] Usings = new string[] {
             "System",
             "System.Linq",
             "Android.Graphics",
             "System.Collections.Generic",
+        };
+
+        private static readonly Regex JavaConstantConventionRegex = new Regex(@"^[A-Z_]+[A-Z_\d]*$");
+
+        private static readonly string[] ResizingBehaviorEnum = new string[] { "AspectFit", "AspectFill", "Stretch", "Center" };
+
+        private static readonly Dictionary<string, string> ExpressionMappings = new Dictionary<string, string> {
+            { @"Paint\.ANTI_ALIAS_FLAG", @"PaintFlags.AntiAlias" },
+            { @"Paint\.Style\.FILL", @"Paint.Style.Fill" },
+            { @"Path\.FillType\.EVEN_ODD", @"Path.FillType.EvenOdd" },
+            { @"Path\.Direction\.CW", @"Path.Direction.Cw" },
+            { @"Shader\.TileMode\.CLAMP", @"Shader.TileMode.Clamp" },
+            { @"Canvas\.ALL_SAVE_FLAG", @"SaveFlags.All" },
+            { @"BlurMaskFilter\.Blur\.NORMAL", @"BlurMaskFilter.Blur.Normal" },
+            { @"Paint\.Style\.STROKE", @"Paint.Style.Stroke" },
+            { @"PorterDuff\.Mode\.SRC_IN", @"PorterDuff.Mode.SrcIn" },
+            { @"Arrays\.equals", @"Enumerable.SequenceEqual" },
         };
 
         private readonly TokenStreamRewriter _rewriter;
@@ -28,6 +45,7 @@ namespace StyleKitSharper.Web.Transpiler
 
         public void Visit(IParseTree node)
         {
+            var traverseChildren = true;
             switch (node)
             {
                 case CompilationUnitContext ctx:
@@ -49,15 +67,24 @@ namespace StyleKitSharper.Web.Transpiler
                     VisitTypeType(ctx);
                     break;
                 case ExpressionContext ctx:
-                    VisitExpression(ctx);
+                    traverseChildren = VisitExpression(ctx);
+                    break;
+                case SwitchLabelContext ctx:
+                    VisitSwitchLabel(ctx);
+                    break;
+                case VariableDeclaratorIdContext ctx:
+                    VisitariableDeclaratorId(ctx);
                     break;
                 default:
                     break;
             }
 
-            for (int i = 0; i < node.ChildCount; i++)
+            if (traverseChildren)
             {
-                Visit(node.GetChild(i));
+                for (int i = 0; i < node.ChildCount; i++)
+                {
+                    Visit(node.GetChild(i));
+                }
             }
         }
 
@@ -78,7 +105,7 @@ namespace StyleKitSharper.Web.Transpiler
                 _rewriter.Replace(
                     imports.First().Start,
                     imports.Last().Stop,
-                    string.Join("\n", usings.Select(x => $"using {x};")));
+                    string.Join("\n", Usings.Select(x => $"using {x};")));
             }
         }
 
@@ -100,6 +127,8 @@ namespace StyleKitSharper.Web.Transpiler
             var privateModifier = ctx.modifier().FirstOrDefault(x => x.GetText() == "private");
             var publicModifier = ctx.modifier().FirstOrDefault(x => x.GetText() == "public");
             var staticModifier = ctx.modifier().FirstOrDefault(x => x.GetText() == "static");
+            var overrideModifier = ctx.modifier().FirstOrDefault(x => x.classOrInterfaceModifier()?.annotation()?.annotationName()?.qualifiedName()?.Identifier().FirstOrDefault()?.GetText() == "Override");
+
             if (publicModifier == null)
             {
                 if (privateModifier == null)
@@ -110,6 +139,12 @@ namespace StyleKitSharper.Web.Transpiler
                 {
                     _rewriter.Replace(privateModifier.Start, privateModifier.Stop, "internal");
                 }
+            }
+
+            if (overrideModifier != null)
+            {
+                _rewriter.Delete(overrideModifier.Start, overrideModifier.Stop);
+                _rewriter.InsertBefore(ctx.memberDeclaration().Start, "override ");
             }
         }
 
@@ -144,28 +179,73 @@ namespace StyleKitSharper.Web.Transpiler
             }
         }
 
-        private void VisitExpression(ExpressionContext ctx)
+        private bool VisitExpression(ExpressionContext ctx)
         {
-            //if (ctx.children.Count >= 3)
-            //{
-            //    if (ctx.children[0] is ExpressionContext leftExpression
-            //        && ctx.children[1].GetText() == "(")
-            //    {
-            //        if ((ctx.children[2].GetText() == ")")
-            //            || (ctx.children[2] is ExpressionListContext && ctx.children[3].GetText() == ")"))
-            //        {
-            //            var identifier = leftExpression.Identifier();
-            //            if (identifier != null)
-            //            {
-            //                _rewriter.Replace(identifier.Symbol, identifier.GetText().Pascalize());
-            //            }
-            //        }
-            //    }
-            //}
+            var expressionText = ctx.GetText();
+            foreach (var map in ExpressionMappings)
+            {
+                if (Regex.IsMatch(expressionText, $"^{map.Key}$"))
+                {
+                    _rewriter.Replace(ctx.Start, ctx.Stop, map.Value);
+                    return false;
+                }
+            }
+
             var identifier = ctx.Identifier();
             if (identifier != null)
             {
                 _rewriter.Replace(identifier.Symbol, identifier.GetText().Pascalize());
+            }
+            else if (ctx.children.Count == 3)
+            {
+                if (ctx.children[1].GetText() == "instanceof"
+                    && ctx.children[2] is TypeTypeContext)
+                {
+                    var instanceof = (TerminalNodeImpl)ctx.children[1];
+                    _rewriter.Replace(instanceof.Symbol, "is");
+                }
+            }
+
+            return true;
+        }
+
+        private void VisitSwitchLabel(SwitchLabelContext ctx)
+        {
+            var expr = ctx.constantExpression();
+            if (expr != null)
+            {
+                var exprText = expr.GetText();
+                if (ResizingBehaviorEnum.Contains(exprText))
+                {
+                    _rewriter.Replace(expr.Start, expr.Stop, $"ResizingBehavior.{exprText}");
+                }
+            }
+        }
+
+        private void VisitariableDeclaratorId(VariableDeclaratorIdContext ctx)
+        {
+            var idenifier = ctx.Identifier();
+            if (ctx.GetText().EndsWith("[]") && idenifier != null)
+            {
+                var idenifierText = idenifier.GetText();
+                var fieldDeclaration = ctx.Ancestors().OfType<FieldDeclarationContext>().FirstOrDefault();
+                var localVariableDeclaration = ctx.Ancestors().OfType<LocalVariableDeclarationContext>().FirstOrDefault();
+
+                TypeTypeContext typeType = null;
+                if (fieldDeclaration != null)
+                {
+                    typeType = fieldDeclaration.typeType();
+                }
+                else if (localVariableDeclaration != null)
+                {
+                    typeType = localVariableDeclaration.typeType();
+                }
+
+                if (typeType != null)
+                {
+                    _rewriter.InsertAfter(typeType.Stop, "[]");
+                    _rewriter.Replace(ctx.Start, ctx.Stop, idenifierText);
+                }
             }
         }
 
