@@ -13,18 +13,18 @@ namespace StyleKitSharper.Core.Transpiler
 {
     public class StyleKitVisitor
     {
-        private static readonly string[] Usings = new string[] {
+        protected static readonly string[] Usings = new string[] {
             "System",
             "System.Linq",
             "Android.Graphics",
             "System.Collections.Generic",
         };
 
-        private static readonly Regex JavaConstantConventionRegex = new Regex(@"^[A-Z_]+[A-Z_\d]*$");
+        protected static readonly Regex JavaConstantConventionRegex = new Regex(@"^[A-Z_]+[A-Z_\d]*$");
 
-        private static readonly string[] ResizingBehaviorEnum = new string[] { "AspectFit", "AspectFill", "Stretch", "Center" };
+        protected static readonly string[] ResizingBehaviorEnum = new string[] { "AspectFit", "AspectFill", "Stretch", "Center" };
 
-        private static readonly Dictionary<string, string> ExpressionMappings = new Dictionary<string, string> {
+        protected static readonly Dictionary<string, string> ExpressionMappings = new Dictionary<string, string> {
             { @"Paint\.ANTI_ALIAS_FLAG", @"PaintFlags.AntiAlias" },
             { @"Paint\.Style\.FILL", @"Paint.Style.Fill" },
             { @"Path\.FillType\.EVEN_ODD", @"Path.FillType.EvenOdd" },
@@ -44,47 +44,37 @@ namespace StyleKitSharper.Core.Transpiler
             { @"(.*)\.drawColor\((.*)\.color\)", @"$1.DrawColor((ColorWrapper)$2.Color)" },
         };
 
-        private readonly TokenStreamRewriter _rewriter;
+        protected static readonly Dictionary<string, string> ColorClassMethods = new Dictionary<string, string>
+        {
+            { "red", "GetRedComponent" },
+            { "green", "GetGreenComponent" },
+            { "blue", "GetBlueComponent" },
+            { "alpha", "GetAlphaComponent" },
+            { "argb", "Argb" },
+            { "RGBToHSV", "RGBToHSV" },
+            { "HSVToColor", "HSVToColor" },
+        };
+
+        protected readonly TokenStreamRewriter _rewriter;
 
         public StyleKitVisitor(ITokenStream tokens)
         {
             _rewriter = new TokenStreamRewriter(tokens);
         }
 
+        protected StyleKitVisitor(StyleKitVisitor parent)
+        {
+            _rewriter = parent._rewriter;
+        }
+
         public void Visit(IParseTree node)
         {
             var traverseChildren = true;
-            switch (node)
+
+            var visitor = ResolveNodeVisitor(node);
+            if (visitor != null)
             {
-                case CompilationUnitContext ctx:
-                    VisitCompilationUnit(ctx);
-                    break;
-                case ClassDeclarationContext ctx:
-                    VisitClassDeclaration(ctx);
-                    break;
-                case ClassBodyDeclarationContext ctx:
-                    VisitClassBodyDeclaration(ctx);
-                    break;
-                case MethodDeclarationContext ctx:
-                    VisitMethodDeclaration(ctx);
-                    break;
-                case FieldDeclarationContext ctx:
-                    VisitFieldDeclaration(ctx);
-                    break;
-                case TypeTypeContext ctx:
-                    VisitTypeType(ctx);
-                    break;
-                case ExpressionContext ctx:
-                    traverseChildren = VisitExpression(ctx);
-                    break;
-                case SwitchLabelContext ctx:
-                    VisitSwitchLabel(ctx);
-                    break;
-                case VariableDeclaratorIdContext ctx:
-                    VisitariableDeclaratorId(ctx);
-                    break;
-                default:
-                    break;
+                traverseChildren = visitor();
             }
 
             if (traverseChildren)
@@ -96,7 +86,33 @@ namespace StyleKitSharper.Core.Transpiler
             }
         }
 
-        private void VisitCompilationUnit(CompilationUnitContext ctx)
+        protected virtual Func<bool> ResolveNodeVisitor(IParseTree node)
+        {
+            switch (node)
+            {
+                case CompilationUnitContext ctx:
+                    return () => VisitCompilationUnit(ctx);
+                case ClassDeclarationContext ctx:
+                    return () => VisitClassDeclaration(ctx);
+                case ClassBodyDeclarationContext ctx:
+                    return () => VisitClassBodyDeclaration(ctx);
+                case MethodDeclarationContext ctx:
+                    return () => VisitMethodDeclaration(ctx);
+                case FieldDeclarationContext ctx:
+                    return () => VisitFieldDeclaration(ctx);
+                case TypeTypeContext ctx:
+                    return () => VisitTypeType(ctx);
+                case ExpressionContext ctx:
+                    return () => VisitExpression(ctx);
+                case SwitchLabelContext ctx:
+                    return () => VisitSwitchLabel(ctx);
+                case VariableDeclaratorIdContext ctx:
+                    return () => VisitariableDeclaratorId(ctx);
+            }
+            return null;
+        }
+
+        protected virtual bool VisitCompilationUnit(CompilationUnitContext ctx)
         {
             var package = ctx.packageDeclaration();
             if (package != null)
@@ -121,22 +137,25 @@ namespace StyleKitSharper.Core.Transpiler
             }
 
             _rewriter.InsertAfter(ctx.Stop, "\n\n" + Resources.ColorWrapper);
+
+            return true;
         }
 
-        private void VisitClassDeclaration(ClassDeclarationContext ctx)
+        protected virtual bool VisitClassDeclaration(ClassDeclarationContext ctx)
         {
             var className = ctx.children[1];
 
             if (className.GetText() == "PaintCodeColor")
             {
-                var extendsToken = (TerminalNodeImpl)ctx.children[2];
-                var colorClass = (TypeTypeContext)ctx.children[3];
-                _rewriter.Delete(extendsToken.Symbol);
-                _rewriter.Delete(colorClass.Start);
+                var styleKitPaintCodeColorClassVisitor = new StyleKitPaintCodeColorClassVisitor(this);
+                styleKitPaintCodeColorClassVisitor.Visit(ctx);
+                return false;
             }
+
+            return true;
         }
 
-        private void VisitClassBodyDeclaration(ClassBodyDeclarationContext ctx)
+        protected virtual bool VisitClassBodyDeclaration(ClassBodyDeclarationContext ctx)
         {
             var privateModifier = ctx.modifier().FirstOrDefault(x => x.GetText() == "private");
             var publicModifier = ctx.modifier().FirstOrDefault(x => x.GetText() == "public");
@@ -160,17 +179,21 @@ namespace StyleKitSharper.Core.Transpiler
                 _rewriter.Delete(overrideModifier.Start, overrideModifier.Stop);
                 _rewriter.InsertBefore(ctx.memberDeclaration().Start, "override ");
             }
+
+            return true;
         }
 
-        private void VisitMethodDeclaration(MethodDeclarationContext ctx)
+        protected virtual bool VisitMethodDeclaration(MethodDeclarationContext ctx)
         {
             var methodNameNode = ctx.children.OfType<TerminalNodeImpl>()
                 .Where(x => x.Symbol.Type == Identifier).Single();
 
             _rewriter.Replace(methodNameNode.Symbol, methodNameNode.GetText().Pascalize());
+
+            return true;
         }
 
-        private void VisitFieldDeclaration(FieldDeclarationContext ctx)
+        protected virtual bool VisitFieldDeclaration(FieldDeclarationContext ctx)
         {
             var fieldNameNodes = ctx.Descendants().OfType<VariableDeclaratorIdContext>().ToList();
 
@@ -179,9 +202,11 @@ namespace StyleKitSharper.Core.Transpiler
                 var identifier = node.Identifier();
                 _rewriter.Replace(identifier.Symbol, identifier.GetText().Pascalize());
             }
+
+            return true;
         }
 
-        private void VisitTypeType(TypeTypeContext ctx)
+        protected virtual bool VisitTypeType(TypeTypeContext ctx)
         {
             var primitiveType = ctx.primitiveType();
             if (primitiveType != null)
@@ -191,9 +216,11 @@ namespace StyleKitSharper.Core.Transpiler
                     _rewriter.Replace(primitiveType.Start, primitiveType.Stop, "bool");
                 }
             }
+
+            return true;
         }
 
-        private bool VisitExpression(ExpressionContext ctx)
+        protected virtual bool VisitExpression(ExpressionContext ctx)
         {
             var expressionText = ctx.GetText();
             foreach (var map in ExpressionMappings)
@@ -203,6 +230,20 @@ namespace StyleKitSharper.Core.Transpiler
                     var replacement = Regex.Replace(expressionText, map.Key, map.Value);
                     _rewriter.Replace(ctx.Start, ctx.Stop, replacement);
                     return false;
+                }
+                else if (Regex.IsMatch(expressionText, @"^Color.[A-Za-z_]+[A-Za-z_\d]*$"))
+                {
+                    var memberText = expressionText.Substring(6);
+                    if (ColorClassMethods.ContainsKey(memberText))
+                    {
+                        _rewriter.Replace(ctx.Start, ctx.Stop, $"Color.{ColorClassMethods[memberText]}");
+                        return false;
+                    }
+                    else if (JavaConstantConventionRegex.IsMatch(memberText))
+                    {
+                        _rewriter.Replace(ctx.Start, ctx.Stop, $"Color.{memberText.ToLowerInvariant().Pascalize()}");
+                        return false;
+                    }
                 }
             }
 
@@ -224,7 +265,7 @@ namespace StyleKitSharper.Core.Transpiler
             return true;
         }
 
-        private void VisitSwitchLabel(SwitchLabelContext ctx)
+        protected virtual bool VisitSwitchLabel(SwitchLabelContext ctx)
         {
             var expr = ctx.constantExpression();
             if (expr != null)
@@ -235,9 +276,11 @@ namespace StyleKitSharper.Core.Transpiler
                     _rewriter.Replace(expr.Start, expr.Stop, $"ResizingBehavior.{exprText}");
                 }
             }
+
+            return true;
         }
 
-        private void VisitariableDeclaratorId(VariableDeclaratorIdContext ctx)
+        protected virtual bool VisitariableDeclaratorId(VariableDeclaratorIdContext ctx)
         {
             var idenifier = ctx.Identifier();
             if (ctx.GetText().EndsWith("[]") && idenifier != null)
@@ -262,6 +305,8 @@ namespace StyleKitSharper.Core.Transpiler
                     _rewriter.Replace(ctx.Start, ctx.Stop, idenifierText);
                 }
             }
+
+            return true;
         }
 
         public string GetResult()

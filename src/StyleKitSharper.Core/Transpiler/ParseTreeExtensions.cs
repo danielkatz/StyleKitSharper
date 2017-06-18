@@ -20,10 +20,9 @@ namespace StyleKitSharper.Core.Transpiler
         {
             for (int i = 0; i < node.ChildCount; i++)
             {
-                var child = node.GetChild(i);
-                yield return child;
+                yield return node.GetChild(i);
 
-                var descendants = Descendants(node.GetChild(i));
+                var descendants = node.GetChild(i).Descendants();
                 foreach (var descendant in descendants)
                 {
                     yield return descendant;
