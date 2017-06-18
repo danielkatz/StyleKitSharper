@@ -9,17 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\js\app\**" />
     <Compile Remove="wwwroot\lib\requirejs\**" />
+    <Content Remove="wwwroot\js\app\**" />
     <Content Remove="wwwroot\lib\requirejs\**" />
+    <EmbeddedResource Remove="wwwroot\js\app\**" />
     <EmbeddedResource Remove="wwwroot\lib\requirejs\**" />
+    <None Remove="wwwroot\js\app\**" />
     <None Remove="wwwroot\lib\requirejs\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="wwwroot\js\app\main.js" />
-    <Content Include="wwwroot\js\app\main.min.js" />
-    <Content Include="wwwroot\js\app\site.js" />
-    <Content Include="wwwroot\js\app\site.min.js" />
     <Content Include="wwwroot\js\main.js" />
     <Content Include="wwwroot\js\main.min.js" />
   </ItemGroup>
