@@ -25,7 +25,7 @@
     };
 
     var base64EncodingUTF8 = function (str) {
-        var encoded = new TextEncoderLite('utf-8').encode(str);
+        var encoded = new TextEncoderLite("utf-8").encode(str);
         var b64Encoded = base64js.fromByteArray(encoded);
         return b64Encoded;
     }
