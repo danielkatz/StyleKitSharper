@@ -7,6 +7,7 @@
     "jquery-validation": "1.14.0",
     "jquery-validation-unobtrusive": "3.2.6",
     "base64-js": "v1.2.0",
-    "text-encoder-lite": "v1.0.0"
+    "text-encoder-lite": "v1.0.0",
+    "ace-builds": "v1.2.7"
   }
 }

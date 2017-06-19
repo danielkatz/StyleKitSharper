@@ -1,52 +1,61 @@
 ﻿body {
     padding-top: 50px;
-    padding-bottom: 20px;
 }
 
-/* Wrapping element */
-/* Set some basic padding to keep content from hitting the edges */
-.body-content {
-    padding-left: 15px;
-    padding-right: 15px;
+::-webkit-scrollbar {
+    width: 0.5em;
 }
 
-/* Carousel */
-.carousel-caption p {
-    font-size: 20px;
-    line-height: 1.4;
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Make .svg files in the carousel display properly in older browsers */
-.carousel-inner .item img[src$=".svg"] {
-    width: 100%;
+::-webkit-scrollbar-thumb {
+    background: rgba(100, 100, 100, 0.8);
 }
 
-/* Hide/rearrange for smaller screens */
-@media screen and (max-width: 767px) {
-    /* Hide captions */
-    .carousel-caption {
-        display: none;
-    }
-}
-
-#java, #csharp {
-    height: calc(100vh - 150px);
-}
-
-#java {
-}
-
-    #java .java-input {
-        height: 100%;
-        width: 100%;
+    ::-webkit-scrollbar-corner,
+    ::-webkit-scrollbar-thumb:window-inactive {
+        background: rgba(100, 100, 100, 0.4);
     }
 
-#csharp {
+
+.editor-pane {
+    position: relative;
+    height: calc(100vh - 50px);
+    padding: 0;
 }
 
-    #csharp .csharp-output {
-        height: 100%;
+    .editor-pane .editor-overlay {
+        position: absolute;
+        pointer-events: none;
+        top: 0;
+        left: 0;
+        height: 64px;
         width: 100%;
-        white-space: pre;
-        overflow: scroll;
+        padding-right: 15px;
+        z-index: 1;
+        text-align: right;
+        opacity: 0.5;
+        transition: opacity 200ms;
+    }
+
+    .editor-pane:hover .editor-overlay {
+        opacity: 1;
+    }
+
+    .editor-pane .editor {
+        width: 100%;
+        height: 100%;
+    }
+
+.lang-logo {
+    height: 64px;
+}
+
+    .lang-logo.lang-logo-java {
+        padding: 7px;
+    }
+
+    .lang-logo.lang-logo-xamarin {
     }

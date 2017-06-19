@@ -2,16 +2,19 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="row">
-    <div id="java" class="col-md-6">
-        <textarea class="form-control java-input"></textarea>
-    </div>
-    <div id="csharp" class="col-md-6">
-        <div class="well csharp-output"></div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-lg-12 text-center">
-        <button id="btnConvert" class="btn btn-success btn-lg">Convert</button>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 editor-pane">
+            <div id="java" class="editor">// Paste StyleKit java code here...</div>
+            <div class="editor-overlay">
+                <img class="lang-logo lang-logo-java" src="~/images/Java.svg" />
+            </div>
+        </div>
+        <div class="col-md-6 editor-pane">
+            <div id="csharp" class="editor">// Nothing yet...</div>
+            <div class="editor-overlay">
+                <img class="lang-logo lang-logo-xamarin" src="~/images/Xamagon.svg" />
+            </div>
+        </div>
     </div>
 </div>

@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="wwwroot\images\GitHub-Mark-Light-32px.png" />
     <Content Include="wwwroot\js\main.js" />
     <Content Include="wwwroot\js\main.min.js" />
   </ItemGroup>
