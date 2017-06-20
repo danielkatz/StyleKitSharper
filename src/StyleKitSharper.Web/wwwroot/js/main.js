@@ -39,7 +39,7 @@
                 });
             }
         }
-    }, 250, true);
+    }, 250);
 
     function base64EncodingUTF8(str) {
         var encoded = new TextEncoderLite("utf-8").encode(str);
