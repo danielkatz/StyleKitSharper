@@ -1,7 +1,7 @@
 # StyleKitSharper
 [StyleKitSharper](http://stylekitsharper.azurewebsites.net/) is a tool that transpiles StyleKits produced by [PaintCode 3](https://www.paintcodeapp.com/) from Java to C# for use in Xamarin.Android projects.
 
-Since PaintCode 3 doesn't provide a built-in code generator for Android C# Xamarin, StyleKitSharper aims to this gap until the official support will be ready.
+Since PaintCode 3 doesn't provide a built-in code generator for Android C# Xamarin, StyleKitSharper aims to close this gap until the official support will be ready.
 
 ## Usage
 You can transpile your StyleKits by using the [live](http://stylekitsharper.azurewebsites.net/) version. I'm also working on a command line tool, let me know if there is an interest for this.
