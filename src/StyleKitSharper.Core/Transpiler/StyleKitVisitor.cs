@@ -34,12 +34,14 @@ namespace StyleKitSharper.Core.Transpiler
             { @"BlurMaskFilter\.Blur\.NORMAL", @"BlurMaskFilter.Blur.Normal" },
             { @"Paint\.Style\.STROKE", @"Paint.Style.Stroke" },
             { @"PorterDuff\.Mode\.SRC_IN", @"PorterDuff.Mode.SrcIn" },
+            { @"Paint\.Cap\.SQUARE", @"Paint.Cap.Square" },
             { @"Arrays\.equals", @"Enumerable.SequenceEqual" },
 
             { @"(.*)\.setFlags", @"$1.Flags = " },
             { @"(.*)\.setColor", @"$1.Color = (ColorWrapper)" },
             { @"(.*)\.setStrokeWidth", @"$1.StrokeWidth = " },
             { @"(.*)\.setStrokeMiter", @"$1.StrokeMiter = " },
+            { @"(.*)\.setStrokeCap", @"$1.StrokeCap = " },
 
             { @"(.*)\.drawColor\((.*)\.color\)", @"$1.DrawColor((ColorWrapper)$2.Color)" },
         };
