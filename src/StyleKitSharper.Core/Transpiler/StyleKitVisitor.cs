@@ -26,15 +26,7 @@ namespace StyleKitSharper.Core.Transpiler
 
         protected static readonly Dictionary<string, string> ExpressionMappings = new Dictionary<string, string> {
             { @"Paint\.ANTI_ALIAS_FLAG", @"PaintFlags.AntiAlias" },
-            { @"Paint\.Style\.FILL", @"Paint.Style.Fill" },
-            { @"Path\.FillType\.EVEN_ODD", @"Path.FillType.EvenOdd" },
-            { @"Path\.Direction\.CW", @"Path.Direction.Cw" },
-            { @"Shader\.TileMode\.CLAMP", @"Shader.TileMode.Clamp" },
             { @"Canvas\.ALL_SAVE_FLAG", @"SaveFlags.All" },
-            { @"BlurMaskFilter\.Blur\.NORMAL", @"BlurMaskFilter.Blur.Normal" },
-            { @"Paint\.Style\.STROKE", @"Paint.Style.Stroke" },
-            { @"PorterDuff\.Mode\.SRC_IN", @"PorterDuff.Mode.SrcIn" },
-            { @"Paint\.Cap\.SQUARE", @"Paint.Cap.Square" },
             { @"Arrays\.equals", @"Enumerable.SequenceEqual" },
 
             { @"(.*)\.setFlags", @"$1.Flags = " },
@@ -44,6 +36,17 @@ namespace StyleKitSharper.Core.Transpiler
             { @"(.*)\.setStrokeCap", @"$1.StrokeCap = " },
 
             { @"(.*)\.drawColor\((.*)\.color\)", @"$1.DrawColor((ColorWrapper)$2.Color)" },
+        };
+
+        protected static readonly string[] EnumClasses = new[] {
+            "Color",
+            "Paint.Style",
+            "Path.FillType",
+            "Path.Direction",
+            "Shader.TileMode",
+            "BlurMaskFilter.Blur",
+            "PorterDuff.Mode",
+            "Paint.Cap",
         };
 
         protected static readonly Dictionary<string, string> ColorClassMethods = new Dictionary<string, string>
@@ -233,19 +236,28 @@ namespace StyleKitSharper.Core.Transpiler
                     _rewriter.Replace(ctx.Start, ctx.Stop, replacement);
                     return false;
                 }
-                else if (Regex.IsMatch(expressionText, @"^Color.[A-Za-z_]+[A-Za-z_\d]*$"))
+            }
+
+            foreach (var path in EnumClasses)
+            {
+                if (expressionText.StartsWith(path + "."))
                 {
-                    var memberText = expressionText.Substring(6);
-                    if (ColorClassMethods.ContainsKey(memberText))
+                    var memberText = expressionText.Substring(path.Length + 1);
+                    if (JavaConstantConventionRegex.IsMatch(memberText))
                     {
-                        _rewriter.Replace(ctx.Start, ctx.Stop, $"Color.{ColorClassMethods[memberText]}");
+                        _rewriter.Replace(ctx.Start, ctx.Stop, $"{path}.{memberText.ToLowerInvariant().Pascalize()}");
                         return false;
                     }
-                    else if (JavaConstantConventionRegex.IsMatch(memberText))
-                    {
-                        _rewriter.Replace(ctx.Start, ctx.Stop, $"Color.{memberText.ToLowerInvariant().Pascalize()}");
-                        return false;
-                    }
+                }
+            }
+
+            if (Regex.IsMatch(expressionText, @"^Color.[A-Za-z_]+[A-Za-z_\d]*$"))
+            {
+                var memberText = expressionText.Substring(6);
+                if (ColorClassMethods.ContainsKey(memberText))
+                {
+                    _rewriter.Replace(ctx.Start, ctx.Stop, $"Color.{ColorClassMethods[memberText]}");
+                    return false;
                 }
             }
 
