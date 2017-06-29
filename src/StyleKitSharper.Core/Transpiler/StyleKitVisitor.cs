@@ -122,7 +122,7 @@ namespace StyleKitSharper.Core.Transpiler
             var package = ctx.packageDeclaration();
             if (package != null)
             {
-                var qualifiedName = package.qualifiedName().GetText();
+                var qualifiedName = Namespace ?? package.qualifiedName().GetText();
 
                 _rewriter.Replace(package.Start, package.Stop, $"namespace {qualifiedName} {{");
             }
@@ -327,5 +327,7 @@ namespace StyleKitSharper.Core.Transpiler
         {
             return _rewriter.GetText();
         }
+
+        public string Namespace { get; set; }
     }
 }

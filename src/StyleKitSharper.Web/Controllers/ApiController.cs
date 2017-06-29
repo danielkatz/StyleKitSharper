@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using Antlr4.Runtime;
 using StyleKitSharper.Core.Transpiler;
+using StyleKitSharper.Core;
 
 namespace StyleKitSharper.Web.Controllers
 {
@@ -15,25 +16,12 @@ namespace StyleKitSharper.Web.Controllers
         [HttpPost("transform")]
         public IActionResult Transform([FromBody] string base64)
         {
+            var transpiler = new StyleKitTranspiler();
             var bytes = Convert.FromBase64String(base64);
             var java = Encoding.UTF8.GetString(bytes);
-            var csharp = JavaToCSharp(java);
+            var csharp = transpiler.Transpile(java);
 
             return Content(csharp);
-        }
-
-        private string JavaToCSharp(string java)
-        {
-            var stream = new AntlrInputStream(java);
-            var lexer = new JavaLexer(stream);
-            var tokens = new CommonTokenStream(lexer);
-            var parser = new JavaParser(tokens);
-            parser.BuildParseTree = true;
-
-            var transpiler = new StyleKitVisitor(tokens);
-            transpiler.Visit(parser.compilationUnit());
-
-            return transpiler.GetResult();
         }
     }
 }
