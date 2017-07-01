@@ -31,17 +31,9 @@
         pointer-events: none;
         top: 0;
         left: 0;
-        height: 64px;
+        height: 100%;
         width: 100%;
-        padding-right: 15px;
         z-index: 1;
-        text-align: right;
-        opacity: 0.5;
-        transition: opacity 200ms;
-    }
-
-    .editor-pane:hover .editor-overlay {
-        opacity: 1;
     }
 
     .editor-pane .editor {
@@ -49,13 +41,76 @@
         height: 100%;
     }
 
+    .editor-pane .editor-overlay .drop-target-el {
+        position: absolute;
+        top: 0;
+        display: none;
+        height: 100%;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.50);
+    }
+
+        .editor-pane .editor-overlay .drop-target-el .drop-message {
+            position: absolute;
+            margin: 0;
+            top: 50%;
+            left: 50%;
+            margin-right: -50%;
+            transform: translate(-50%, -50%)
+        }
+
+    .editor-pane .editor-overlay.drag-over .drop-target-el {
+        display: block;
+    }
+
+    .editor-pane:hover .editor-overlay .lang-logo {
+        opacity: 1;
+    }
+
 .lang-logo {
-    height: 64px;
+    padding-right: 15px;
+    opacity: 0.5;
+    text-align: right;
+    transition: opacity 200ms;
 }
 
-    .lang-logo.lang-logo-java {
+    .lang-logo img {
+        height: 64px;
+    }
+
+    .lang-logo.lang-logo-java img {
         padding: 7px;
     }
 
     .lang-logo.lang-logo-xamarin {
     }
+
+        .lang-logo.lang-logo-xamarin.working {
+            opacity: 1;
+        }
+
+            .lang-logo.lang-logo-xamarin.working img {
+                -webkit-animation: spin 2s linear infinite;
+                -moz-animation: spin 2s linear infinite;
+                animation: spin 2s linear infinite;
+            }
+
+
+@-moz-keyframes spin {
+    100% {
+        -moz-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}

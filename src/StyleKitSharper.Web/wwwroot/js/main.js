@@ -19,6 +19,50 @@
         csharp.getSession().setMode("ace/mode/csharp");
         csharp.setReadOnly(true);
         csharpEditor = csharp;
+
+        $(document).on('dragover', function (e) {
+            var dt = e.originalEvent.dataTransfer;
+            if (dt.types && (dt.types.indexOf ? dt.types.indexOf('Files') != -1 : dt.types.contains('Files'))) {
+                $('.drop-target').addClass('drag-over');
+                e.preventDefault();
+            }
+        });
+
+        $(document).on('dragleave', function (ev) {
+            $('.drop-target').removeClass('drag-over');
+        });
+
+        $(document).on('drop', function (e) {
+            $('.drop-target').removeClass('drag-over');
+
+            var dt = e.originalEvent.dataTransfer;
+            if (dt.types && (dt.types.indexOf ? dt.types.indexOf('Files') != -1 : dt.types.contains('Files'))) {
+                var file = null;
+
+                if (dt.items) {
+                    for (var i = 0; i < dt.items.length; i++) {
+                        if (dt.items[i].kind == "file") {
+                            var f = dt.items[i].getAsFile();
+                            if (f && /.*.java/ig.test(f.name)) {
+                                file = f;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (file) {
+                    e.preventDefault();
+
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        javaEditor.setValue(e.target.result);
+                        javaEditor.gotoLine(0, 0);
+                    };
+                    reader.readAsText(file);
+                }
+            }
+        });
     });
 
     var onChange = debounce(function () {
@@ -28,6 +72,8 @@
             if (java.length > 0) {
                 var base64 = base64EncodingUTF8(java);
 
+                $('.lang-logo-xamarin').addClass('working');
+
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify(base64),
@@ -35,6 +81,10 @@
                     contentType: "application/json",
                     success: function (data) {
                         csharpEditor.setValue(data);
+                        csharpEditor.getSession().setScrollTop(0);
+                    },
+                    complete: function () {
+                        $('.lang-logo-xamarin').removeClass('working');
                     }
                 });
             }

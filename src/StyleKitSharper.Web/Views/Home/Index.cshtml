@@ -5,15 +5,25 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-6 editor-pane">
-            <div id="java" class="editor">// Paste StyleKit java code here...</div>
-            <div class="editor-overlay">
-                <img class="lang-logo lang-logo-java" src="~/images/Java.svg" />
+            <div id="java" class="editor">// Drop StyleKit java file here, or paste the code...</div>
+            <div class="editor-overlay drop-target">
+                <div class="lang-logo lang-logo-java">
+                    <img src="~/images/Java.svg" alt="Java" />
+                </div>
+                <div class="drop-target-el">
+                    <div class="drop-message text-center">
+                        <h1>Drop StyleKit file here...</h1>
+                        <h2 class="glyphicon glyphicon-import" />
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-md-6 editor-pane">
             <div id="csharp" class="editor">// Nothing yet...</div>
             <div class="editor-overlay">
-                <img class="lang-logo lang-logo-xamarin" src="~/images/Xamagon.svg" />
+                <div class="lang-logo lang-logo-xamarin">
+                    <img src="~/images/Xamagon.svg" alt="Xamarin" />
+                </div>
             </div>
         </div>
     </div>
