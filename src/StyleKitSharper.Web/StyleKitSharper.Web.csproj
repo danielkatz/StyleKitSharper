@@ -6,6 +6,8 @@
 
   <PropertyGroup>
     <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81;</PackageTargetFallback>
+    <ApplicationInsightsResourceId>/subscriptions/e4c47246-f360-4d33-a5b8-2f4982c59c01/resourcegroups/StyleKitSharper_RG/providers/microsoft.insights/components/StyleKitSharper.Web</ApplicationInsightsResourceId>
+    <ApplicationInsightsAnnotationResourceId>/subscriptions/e4c47246-f360-4d33-a5b8-2f4982c59c01/resourcegroups/StyleKitSharper_RG/providers/microsoft.insights/components/StyleKitSharper.Web</ApplicationInsightsAnnotationResourceId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,6 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StyleKitSharper.Core\StyleKitSharper.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,21 @@
 ﻿@{
     ViewData["Title"] = "About";
 }
-<h2>@ViewData["Title"].</h2>
-<h3>@ViewData["Message"]</h3>
 
-<p>Use this area to provide additional information.</p>
+<div class="container">
+    <h1 class="page-header">StyleKitSharper <small>PaintCode StyleKit transpiler from Java to C# for Xamarin.Android</small></h1>
+
+    <p>StyleKitSharper is a tool that transpiles StyleKits produced by <a href="https://www.paintcodeapp.com/">PaintCode 3</a> from Java to C# for use in Xamarin.Android projects.</p>
+    <p>Since PaintCode 3 doesn't provide a built-in code generator for Android C# Xamarin, StyleKitSharper aims to close this gap until the official support will be ready.</p>
+
+    <h2>Usage</h2>
+    <p>You can transpile your StyleKits by using the <a asp-area="" asp-controller="Home" asp-action="Index">live editor</a>. Alternatively, you can use the command-line tool:</p>
+    <pre>sks MyStyleKit.java MyStyleKit.cs -n MyApp.Android</pre>
+
+    <h2>Contribute</h2>
+    <p>If you having an issue with StyleKitSharper's output, please open an issue on <a href="https://github.com/danielkatz/StyleKitSharper">GitHub</a> and try to provide a useful description of your problem. If you know how to improve something, contributions are very welcome!</p>
+    <p>For sugesstions contact me via <a href="mailto:me@danielkatz.net">me@danielkatz.net</a>.</p>
+
+    <h2>Disclaimer</h2>
+    <p>This in NOT a general purpose transpiler! StyleKitSharper can transpile only StyleKits produced by PaintCode 3.</p>
+</div>

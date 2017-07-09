@@ -1,11 +1,18 @@
 ﻿@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+@{
+    var title = "StyleKitSharper";
+    if (ViewData["Title"] != null)
+    {
+        title += $" | {ViewData["Title"]}";
+    }
+}
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - StyleKitSharper</title>
-
+    <title>@title</title>
+    @RenderSection("seo", false)
     <environment names="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
