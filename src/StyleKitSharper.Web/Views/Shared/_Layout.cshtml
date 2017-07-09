@@ -12,7 +12,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@title</title>
-    @RenderSection("seo", false)
+    @RenderSection("SEO", false)
     <environment names="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
@@ -52,13 +52,6 @@
     <environment names="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-
-        <script src="~/lib/base64-js/base64js.min.js"></script>
-        <script src="~/lib/text-encoder-lite/index.js"></script>
-
-        <script src="~/lib/ace-builds/src/ace.js" type="text/javascript" charset="utf-8"></script>
-
-        <script src="~/js/main.js" asp-append-version="true"></script>
     </environment>
     <environment names="Staging,Production">
         <script>
@@ -86,13 +79,6 @@
                 crossorigin="anonymous"
                 integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
         </script>
-
-        <script src="~/lib/base64-js/base64js.min.js"></script>
-        <script src="~/lib/text-encoder-lite/index.js"></script>
-
-        <script src="~/lib/ace-builds/src-min/ace.js" type="text/javascript" charset="utf-8"></script>
-
-        <script src="~/js/main.min.js" asp-append-version="true"></script>
     </environment>
 
     @RenderSection("Scripts", required: false)

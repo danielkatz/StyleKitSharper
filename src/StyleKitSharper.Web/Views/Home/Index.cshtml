@@ -2,7 +2,7 @@
     ViewData["Title"] = "StyleKit transpiler to C#";
 }
 
-@section seo {
+@section SEO {
     <meta name="description" content="StyleKitSharper is a tool that transpiles StyleKits produced by PaintCode 3 from Java to C# for use in Xamarin.Android projects.">
 }
 
@@ -32,3 +32,22 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <environment names="Development">
+        <script src="~/lib/base64-js/base64js.min.js"></script>
+        <script src="~/lib/text-encoder-lite/index.js"></script>
+
+        <script src="~/lib/ace-builds/src/ace.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="~/js/main.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/lib/base64-js/base64js.min.js"></script>
+        <script src="~/lib/text-encoder-lite/index.js"></script>
+
+        <script src="~/lib/ace-builds/src-min/ace.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="~/js/main.min.js" asp-append-version="true"></script>
+    </environment>
+}
